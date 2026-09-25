@@ -1,0 +1,7 @@
+# secrets
+.env
+
+# python and editor noise
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
