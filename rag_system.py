@@ -206,12 +206,13 @@ def load_golden_set():
 
 
 def retrieval_metrics(vectorstore, in_scope):
-    """Hit rate and average characters retrieved.
+    """Hit rate, precision@k, and average characters retrieved.
 
     A question is a hit if any of the top k chunks came from one of its expected guides.
     """
     hits = 0
     total_chars = 0
+    total_precision = 0
     for item in in_scope:
         docs = vectorstore.similarity_search(item["question"], k=TOP_K)
         # More characters means more text in the prompt, which means more cost.
@@ -219,7 +220,18 @@ def retrieval_metrics(vectorstore, in_scope):
         # Hit rate only looks at retrieval
         if any(doc.metadata["source"] in item["sources"] for doc in docs):
             hits += 1
-    return {"hit_rate": hits / len(in_scope), "avg_chars": total_chars / len(in_scope)}
+        # Precision@k: out of the top k chunks, how many came from a right guide
+        total_precision += sum(doc.metadata["source"] in item["sources"] for doc in docs) / TOP_K
+    return {"hit_rate": hits / len(in_scope), "avg_chars": total_chars / len(in_scope),
+            "precision_at_k": total_precision / len(in_scope)}
+
+
+def judge_answer(question, answer):
+    """Have the model score an answer from 1 (poor) to 5 (great)."""
+    reply = llm.invoke(f"Question: {question}\n\nAnswer:\n{answer}\n\n"
+                       "Score how well the answer responds to the question, from 1 (poor) to 5 (great). "
+                       "Reply with only the number.").content
+    return int(reply.strip()[0])
 
 
 def evaluate_self_rag(vectorstore, in_scope, out_of_scope):
@@ -227,8 +239,10 @@ def evaluate_self_rag(vectorstore, in_scope, out_of_scope):
 
     answered rate: in-scope questions that got a real answer
     refusal rate:  out-of-scope questions that were correctly refused
+    judged score:  average 1 to 5 score of the in-scope answers
     """
     price = PRICE_PER_1K[CHAT_MODEL]
+    scores = []
     answered = 0
     refused = 0
     total_seconds = 0
@@ -250,9 +264,19 @@ def evaluate_self_rag(vectorstore, in_scope, out_of_scope):
             refused += result["answer"] == REFUSAL
         else:
             answered += result["answer"] != REFUSAL
+            # Print each in-scope result so the failures can be looked at one by one
+            if result["answer"] == REFUSAL:
+                # docs is empty when no chunk passed grading, so this shows which step refused
+                reason = "no chunk passed grading" if not result["docs"] else "answer failed the support check"
+                print(f"REFUSED ({reason}): {question}")
+            else:
+                score = judge_answer(question, result["answer"])
+                scores.append(score)
+                print(f"score {score}: {question}")
 
     return {
         "answered rate": answered / len(in_scope),
+        "avg judged score": sum(scores) / len(scores),
         "refusal rate": refused / len(out_of_scope),
         "avg seconds": total_seconds / len(all_questions),
         "avg cost": total_cost / len(all_questions),
