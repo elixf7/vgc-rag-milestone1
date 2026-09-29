@@ -4,6 +4,8 @@ DATA 790 Milestone 1. A Self-RAG question answering system over 55 Pokemon VGC (
 strategy guides. It answers from the guides and says "I don't know" when they do not cover
 the question.
 
+**REPORT IS IN THIS REPO:** Milestone1_Report_Fried_Eli.pdf
+
 ## Architecture
 
 ```mermaid
