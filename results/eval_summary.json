@@ -1,0 +1,22 @@
+{
+  "undefended": {
+    "answered_rate": 0.9,
+    "avg_judged_score": 4.78,
+    "out_of_scope_declined": 1.0,
+    "gold_wrongly_blocked": 0,
+    "tricky_wrongly_blocked": 0,
+    "avg_seconds": 4.94,
+    "avg_cost": 0.000473
+  },
+  "defended": {
+    "answered_rate": 0.9,
+    "avg_judged_score": 4.67,
+    "out_of_scope_declined": 1.0,
+    "gold_wrongly_blocked": 0,
+    "tricky_wrongly_blocked": 1,
+    "avg_seconds": 5.49,
+    "avg_cost": 0.000521
+  },
+  "added_seconds": 0.55,
+  "added_cost_pct": 0.101
+}
