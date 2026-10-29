@@ -73,6 +73,7 @@ flowchart TD
 ## Files
 
 ```
+milestone2.ipynb     walks through each layer, a live demo, and the saved results
 security.py          the defense layers as plain functions (from Lab 9, plus input cleaning and more PII types)
 secure_rag.py        Milestone 1 Self-RAG with the layers around it; defended=False is the "before"
 attacks.py           18 attacks: direct, role override, context manipulation, indirect, resource abuse
