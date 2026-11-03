@@ -103,6 +103,7 @@ INSTRUCTION_MARKERS = [
     r"\[(system|admin|override|debug)[^\]]*\]",
     r"system\s+update",
     r"note\s+to\s+(the\s+)?(ai|assistant|model)s?",
+    r"assistants?\s+(that|who)\s+reads?[^.]*\.",  # whole plain-text planted sentence (attack I4)
 ]
 
 
